@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3 uid="uid://4l6g0reihkpb"]
+
+[ext_resource type="Script" path="res://C#/MarchingSquareGenerator.cs" id="1_fp5qg"]
+[ext_resource type="Image" uid="uid://blladtchf4uk8" path="res://noise.png" id="2_k2ggn"]
+[ext_resource type="Script" path="res://C#/FreeLookCameraBase.cs" id="3_0fy8l"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_xig2b"]
+
+[sub_resource type="Sky" id="Sky_47ecc"]
+sky_material = SubResource("PhysicalSkyMaterial_xig2b")
+
+[sub_resource type="Environment" id="Environment_ont2q"]
+background_mode = 2
+sky = SubResource("Sky_47ecc")
+
+[node name="MarchingSquares" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 18.6494, 17.9395)
+script = ExtResource("1_fp5qg")
+width = 64
+height = 64
+noiseTextureImage = ExtResource("2_k2ggn")
+noiseThreshold = 0.25
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.0374111, 0.9993, 0, -0.9993, -0.0374111, 0, 0, 0)
+script = ExtResource("3_0fy8l")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ont2q")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.650708, 0.759328, 0, -0.759328, 0.650708, 0, 55.7453, 0)
