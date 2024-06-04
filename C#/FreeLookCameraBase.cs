@@ -179,4 +179,9 @@ partial class FreeLookCameraBase : Camera3D
             RotateObjectLocal(new Vector3(1.0f, 0.0f, 0.0f), Mathf.DegToRad(-pitch));
         }
     }
+    public override void _Ready()
+    {
+        Position = new Vector3(0,5,0);
+        Rotation = new Vector3(-0.3f,0,0);
+    }
 }

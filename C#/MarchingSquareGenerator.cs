@@ -12,20 +12,53 @@ public partial class MarchingSquareGenerator : Node3D
 
   [Export] float noiseThreshold = 0.01f;
 
-  float[,] grid;
+  Dictionary<float, float[,]> grids = new Dictionary<float, float[,]>();
 
   public override void _Ready()
   {
     //Generate layers for each distinct height in the heightmap
-    grid = new float[width, height];
-    for (int x = 0; x < width; x++)
+    for (int x = 0; x < noiseTextureImage.GetWidth(); x++)
     {
-      for (int y = 0; y < height; y++)
+      for (int y = 0; y < noiseTextureImage.GetHeight(); y++)
       {
-        grid[x, y] = noiseTextureImage.GetPixel(x, y).R * noiseGain;
+        float fn = noiseTextureImage.GetPixel(x, y).R;
+
+        if (!grids.ContainsKey(fn))
+        {
+          grids.Add(fn, new float[width, height]);
+        }
       }
     }
+
+    //Generate data from the heightmap
+    foreach (KeyValuePair<float, float[,]> kvp in grids)
+    {
+      float[,] grid = kvp.Value;
+      for (int x = 0; x < width; x++)
+      {
+        for (int y = 0; y < height; y++)
+        {
+          //Map from the heightmap to the grid
+          float fx = x / (float)noiseTextureImage.GetWidth();
+          float fy = y / (float)noiseTextureImage.GetHeight();
+          float fn = noiseTextureImage.GetPixel((int)(fx * noiseTextureImage.GetWidth()), (int)(fy * noiseTextureImage.GetHeight())).R;
+          if (fn == kvp.Key)
+            grid[x, y] = 1.0f;
+        }
+      }
+    }
+
+
+
+    foreach (KeyValuePair<float, float[,]> kvp in grids)
+    {
+      MeshInstance3D mesh = new MeshInstance3D();
+      mesh.Mesh = MarchSquares(kvp.Value).ToGodotMesh();
+      mesh.Position = new Vector3(-width / 2, kvp.Key, -height / 2);
+      AddChild(mesh);
+    }
   }
+
 
   public DMesh3 MarchSquares(float[,] grid)
   {
