@@ -11,6 +11,7 @@ sky_material = SubResource("PhysicalSkyMaterial_xig2b")
 
 [sub_resource type="Environment" id="Environment_ont2q"]
 background_mode = 2
+background_energy_multiplier = 8.35
 sky = SubResource("Sky_47ecc")
 
 [node name="MarchingSquares" type="Node3D"]

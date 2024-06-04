@@ -12,48 +12,18 @@ public partial class MarchingSquareGenerator : Node3D
 
   [Export] float noiseThreshold = 0.01f;
 
-  Dictionary<float, float[,]> grids = new Dictionary<float, float[,]>();
+  float[,] grid;
 
   public override void _Ready()
   {
     //Generate layers for each distinct height in the heightmap
-    for (int x = 0; x < noiseTextureImage.GetWidth(); x++)
+    grid = new float[width, height];
+    for (int x = 0; x < width; x++)
     {
-      for (int y = 0; y < noiseTextureImage.GetHeight(); y++)
+      for (int y = 0; y < height; y++)
       {
-        float fn = noiseTextureImage.GetPixel(x, y).R;
-
-        if (!grids.ContainsKey(fn))
-        {
-          grids.Add(fn, new float[width, height]);
-        }
+        grid[x, y] = noiseTextureImage.GetPixel(x, y).R * noiseGain;
       }
-    }
-
-    //Generate data from the heightmap
-    foreach (KeyValuePair<float, float[,]> kvp in grids)
-    {
-      float[,] grid = kvp.Value;
-      for (int x = 0; x < width; x++)
-      {
-        for (int y = 0; y < height; y++)
-        {
-          //Map from the heightmap to the grid
-          float fx = x / (float)noiseTextureImage.GetWidth();
-          float fy = y / (float)noiseTextureImage.GetHeight();
-          float fn = noiseTextureImage.GetPixel((int)(fx * noiseTextureImage.GetWidth()), (int)(fy * noiseTextureImage.GetHeight())).R;
-          if (fn == kvp.Key)
-            grid[x, y] = 1.0f;
-        }
-      }
-    }
-
-    foreach (KeyValuePair<float, float[,]> kvp in grids)
-    {
-      MeshInstance3D mesh = new MeshInstance3D();
-      mesh.Mesh = MarchSquares(kvp.Value).ToGodotMesh();
-      mesh.Position = new Vector3(-width / 2, kvp.Key, -height / 2);
-      AddChild(mesh);
     }
   }
 
@@ -75,13 +45,6 @@ public partial class MarchingSquareGenerator : Node3D
         var c = new Vector3(x + 1, 0, y + 1);
         var d = new Vector3(x, 0, y + 1);
 
-        /*
-        A--e--B
-        |     |
-        h     f
-        |     |
-        D--g--C
-        */
 
 
         var e = a + new Vector3(0.5f, 0, 0);
@@ -89,28 +52,74 @@ public partial class MarchingSquareGenerator : Node3D
         var g = d + new Vector3(0.5f, 0, 0);
         var h = a + new Vector3(0, 0, 0.5f);
 
+        /* Visualization of the cell
+                    A--e--B
+                    |     |
+                    h     f
+                    |     |
+                    D--g--C
+        */
+
+
         int cellType = (int)(aVal + bVal * 2 + cVal * 4 + dVal * 8);
+
         switch (cellType)
         {
           case 0:
             break;
           case 1:
+            /*
+            A--e--B
+            | /   |
+            h/    f
+            |     |
+            D--g--C
+            */
             mesh.AddTriangle(a, e, h);
             break;
           case 2:
+            /*
+            A--e--B
+            |   \ |
+            h    \f
+            |     |
+            D--g--C
+            */
             mesh.AddTriangle(b, f, e);
             break;
           case 3:
+            /* Asteriks denote where the face the quad is
+            A--e--B
+            |* * *|
+            h-----f
+            |     |
+            D--g--C
+            */
             mesh.AddQuad(a, b, f, h);
             break;
           case 4:
+            /* Visualization of the cell
+                        A--e--B
+                        |     |
+                        h    /f
+                        |   / |
+                        D--g--C
+            */
             mesh.AddTriangle(c, g, f);
             break;
           case 5:
+            /* Visualization of the cell
+                        A--e--B
+                        | /   |
+                        h/   /f
+                        |   / |
+                        D--g--C
+            */
             mesh.AddTriangle(f, c, g);
             mesh.AddTriangle(h, a, e);
             break;
           case 6:
+            //You probably get it now
             mesh.AddQuad(e, b, c, g);
             break;
           case 7:
